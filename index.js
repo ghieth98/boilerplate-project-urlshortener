@@ -44,11 +44,22 @@ app.post('/api/shorturl', function (req, res) {
     });
 });
 
-app.get('api/shorturl/:short_url', async (req, res) => {
-    const shortUrl = req.params.short_url;
-    const urlDoc = await urls.findOne({short_url: +shortUrl});
-    res.redirect(urlDoc.url);
-})
+
+app.get('/api/shorturl/:short_url', async (req, res) => {
+    try {
+        const shorturl = req.params.short_url;
+        const urlDoc = await urls.findOne({short_url: +shorturl});
+
+        if (!urlDoc) {
+            return res.status(404).json({error: 'No short URL found'});
+        }
+
+        res.redirect(urlDoc.url);
+    } catch (error) {
+        console.error('Error handling request:', error);
+        res.status(500).json({error: 'Internal Server Error'});
+    }
+});
 
 app.listen(port, function () {
     console.log(`Listening on port ${port}`);
